@@ -1,1 +1,11 @@
-document.addEventListener('DOMContentLoaded', () => { const table = document.querySelector('[data-users-table]'); if (!table) return; const users = Savore.readStore(Savore.SAVORE_KEY.users, [{ name: 'Juan Dela Cruz', email: 'customer@savorecafe.com', role: 'Customer', status: 'Active' }, { name: 'Mia Santos', email: 'staff@savorecafe.com', role: 'Staff', status: 'Active' }, { name: 'Alex Rivera', email: 'admin@savorecafe.com', role: 'Administrator', status: 'Active' }]); table.innerHTML = users.map(user => `<tr><td><strong>${user.name}</strong></td><td>${user.email}</td><td>${user.role}</td><td><span class="status-pill completed">${user.status}</span></td></tr>`).join(''); });
+document.addEventListener('DOMContentLoaded', () => {
+  const table = document.querySelector('[data-users-table]');
+  if (!table) return;
+
+  table.innerHTML = Savore.getUsers().map(user => `<tr>
+    <td><strong>${Savore.escapeHtml(user.name)}</strong></td>
+    <td>${Savore.escapeHtml(user.email)}</td>
+    <td>${Savore.escapeHtml(user.role)}</td>
+    <td><span class="status-pill ${Savore.statusClass(user.status)}">${Savore.escapeHtml(user.status)}</span></td>
+  </tr>`).join('');
+});

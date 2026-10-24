@@ -1,1 +1,49 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Login | Savore Café</title><link rel="stylesheet" href="assets/css/style.css"><link rel="stylesheet" href="assets/css/toast.css"></head><body><header class="site-header"><div class="container navbar"><a class="brand" href="index.html"><span class="brand-mark">S</span>SAVORE CAFÉ</a><a class="btn btn-green" href="register.html">Create account</a></div></header><main class="auth-shell"><div class="auth-card form-card"><div class="eyebrow">Welcome back</div><h1>Login</h1><p>Access your Savore Café account.</p><div class="alert" data-auth-message></div><form data-login-form><div class="field"><label for="email">Email</label><input id="email" name="email" type="email" required></div><div class="field"><label for="password">Password</label><input id="password" name="password" type="password" required></div><button class="btn btn-green" type="submit">Login</button></form><div class="demo-note"><strong>Demo accounts</strong><br>customer@savorecafe.com / customer123<br>staff@savorecafe.com / staff123<br>admin@savorecafe.com / admin123</div></div></main><script src="assets/js/app.js"></script><script src="assets/js/auth.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Savore Café</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/toast.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container navbar">
+      <a class="brand" href="index.html"><span class="brand-mark">S</span>SAVORE CAFÉ</a>
+      <a class="btn btn-green" href="register.html">Create account</a>
+    </div>
+  </header>
+  <main class="auth-shell">
+    <div class="auth-card form-card">
+      <div class="eyebrow">Welcome back</div>
+      <h1>Login</h1>
+      <p>Access your Savore Café account.</p>
+      <div class="alert" data-auth-message role="status" aria-live="polite"></div>
+      <form data-login-form>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Your password" required>
+        </div>
+        <button class="btn btn-green" style="width:100%" type="submit">Login</button>
+      </form>
+      <p class="auth-switch">New to Savore? <a href="register.html">Create an account</a></p>
+      <div class="demo-note">
+        <strong>Demo accounts</strong><br>
+        customer@savorecafe.com / customer123<br>
+        staff@savorecafe.com / staff123<br>
+        admin@savorecafe.com / admin123
+        <br><br>
+        <strong>Admin dashboard</strong><br>
+        <a href="index.html#/admin">Open /#/admin</a> after signing in as the administrator.
+      </div>
+    </div>
+  </main>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/auth.js"></script>
+</body>
+</html>

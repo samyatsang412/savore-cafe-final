@@ -1,6 +1,7 @@
 const SAVORE_KEY = {
-  cart: 'savoreCart', orders: 'savoreOrders', users: 'savoreUsers', products: 'savoreProducts', categories: 'savoreCategories', currentUser: 'savoreCurrentUser'
+  cart: 'savoreCart', orders: 'savoreOrders', users: 'savoreUsers', products: 'savoreProducts', categories: 'savoreCategories', currentUser: 'savoreCurrentUser', catalogVersion: 'savoreCatalogVersion'
 };
+const CATALOG_VERSION = '3';
 
 const defaultProducts = [
   { id: 1, name: 'Espresso', category: 'Coffee', description: 'Rich and bold freshly brewed espresso.', price: 89, image: 'https://images.unsplash.com/photo-1510707577719-ae7c14805e3a?auto=format&fit=crop&w=700&q=80', available: true },
@@ -47,20 +48,131 @@ const demoUsers = [
 
 function readStore(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; } }
 function writeStore(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
-function getProducts() { const products = readStore(SAVORE_KEY.products, null); const cheesecake = products?.find(product => product.name === 'Cheesecake'); const needsMenuMigration = cheesecake && cheesecake.image !== defaultProducts.find(product => product.name === 'Cheesecake').image; if (!products || products.length !== defaultProducts.length || !products.some(product => product.name === 'Espresso') || needsMenuMigration) writeStore(SAVORE_KEY.products, defaultProducts); return readStore(SAVORE_KEY.products, defaultProducts); }
-function getCategories() { const categories = readStore(SAVORE_KEY.categories, null); if (!categories) writeStore(SAVORE_KEY.categories, defaultCategories); return categories || defaultCategories; }
+function getProducts() {
+  const products = readStore(SAVORE_KEY.products, null);
+
+  // Seed only when there is no catalog yet. Never compare lengths or names here:
+  // that would wipe products added, edited, or removed in the admin dashboard.
+  if (!Array.isArray(products)) {
+    const seeded = defaultProducts.map(product => ({ ...product }));
+    writeStore(SAVORE_KEY.products, seeded);
+    writeStore(SAVORE_KEY.catalogVersion, CATALOG_VERSION);
+    return seeded;
+  }
+
+  // One-time catalog migration for data saved by older versions.
+  if (readStore(SAVORE_KEY.catalogVersion, '1') !== CATALOG_VERSION) {
+    const cheesecake = products.find(product => product.name === 'Cheesecake');
+    const defaultCheesecake = defaultProducts.find(product => product.name === 'Cheesecake');
+    if (cheesecake && defaultCheesecake) cheesecake.image = defaultCheesecake.image;
+    writeStore(SAVORE_KEY.products, products);
+    writeStore(SAVORE_KEY.catalogVersion, CATALOG_VERSION);
+  }
+
+  return products;
+}
+function getCategories() {
+  const categories = readStore(SAVORE_KEY.categories, null);
+  if (!Array.isArray(categories)) {
+    const seeded = [...defaultCategories];
+    writeStore(SAVORE_KEY.categories, seeded);
+    return seeded;
+  }
+  return categories;
+}
 function getCart() { return readStore(SAVORE_KEY.cart, []); }
 function getOrders() { return readStore(SAVORE_KEY.orders, []); }
+function normalizeEmail(value) { return String(value || '').trim().toLowerCase(); }
+function getUsers() {
+  const users = readStore(SAVORE_KEY.users, null);
+
+  if (!Array.isArray(users)) {
+    const seeded = demoUsers.map(user => ({ ...user }));
+    writeStore(SAVORE_KEY.users, seeded);
+    return seeded;
+  }
+
+  // The demo site must always keep one administrator account available.
+  // If an older saved user list has none, restore the built-in admin.
+  if (!users.some(user => user.role === 'Administrator')) {
+    const admin = demoUsers.find(user => user.role === 'Administrator');
+    const existing = users.find(user => normalizeEmail(user.email) === normalizeEmail(admin.email));
+    if (existing) existing.role = 'Administrator';
+    else users.push({ ...admin });
+    writeStore(SAVORE_KEY.users, users);
+  }
+
+  return users;
+}
 function money(value) { return `₱${Number(value).toLocaleString('en-PH')}`; }
 function cartCount() { return getCart().reduce((total, item) => total + item.quantity, 0); }
 function cartTotal() { return getCart().reduce((total, item) => total + item.price * item.quantity, 0); }
 function updateCartCount() { document.querySelectorAll('[data-cart-count]').forEach(el => { el.textContent = cartCount(); }); }
 function addToCart(productId) { const product = getProducts().find(item => item.id === Number(productId)); if (!product || !product.available) return; const cart = getCart(); const existing = cart.find(item => item.id === product.id); if (existing) existing.quantity += 1; else cart.push({ id: product.id, name: product.name, price: product.price, image: product.image, quantity: 1 }); writeStore(SAVORE_KEY.cart, cart); updateCartCount(); showToast(`${product.name} added to your order.`); }
-function setPageNav() { const current = location.pathname.split('/').pop() || 'index.html'; document.querySelectorAll('[data-nav]').forEach(link => { if (link.getAttribute('href') === current) link.classList.add('active'); }); document.querySelector('[data-menu-toggle]')?.addEventListener('click', () => document.querySelector('[data-nav-links]')?.classList.toggle('open')); updateCartCount(); }
+function setPageNav() {
+  const current = location.pathname.split('/').pop() || 'index.html';
+  document.querySelectorAll('[data-nav]').forEach(link => { if (link.getAttribute('href') === current) link.classList.add('active'); });
+  const toggle = document.querySelector('[data-menu-toggle]');
+  const links = document.querySelector('[data-nav-links]');
+  if (toggle && links) {
+    toggle.setAttribute('aria-expanded', String(links.classList.contains('open')));
+    toggle.addEventListener('click', () => {
+      const open = links.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', String(open));
+    });
+  }
+  updateCartCount();
+}
 function showToast(message) { let toast = document.querySelector('.toast'); if (!toast) { toast = document.createElement('div'); toast.className = 'toast'; document.body.appendChild(toast); } toast.textContent = message; toast.classList.add('visible'); setTimeout(() => toast.classList.remove('visible'), 2200); }
-function orderNumber() { return `SC${1001 + getOrders().length}`; }
-function statusClass(status) { return status.toLowerCase().replace(' ', '-'); }
+function orderNumber() {
+  const highest = getOrders().reduce((max, order) => {
+    const value = Number(String(order.id || '').replace(/\D/g, ''));
+    return Number.isFinite(value) ? Math.max(max, value) : max;
+  }, 1000);
+  return `SC${highest + 1}`;
+}
+function statusClass(status) { return String(status || '').trim().toLowerCase().replace(/\s+/g, '-'); }
 function formatDate(date) { return new Date(date).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' }); }
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+}
+function getCurrentUser() { return readStore(SAVORE_KEY.currentUser, null); }
+function logoutUser() { localStorage.removeItem(SAVORE_KEY.currentUser); location.href = 'login.html'; }
+function updateAuthNav() {
+  const slot = document.querySelector('[data-auth-nav]');
+  if (!slot) return;
+  const user = getCurrentUser();
+  slot.innerHTML = '';
+  if (user) {
+    const greeting = document.createElement('span');
+    greeting.className = 'nav-user';
+    greeting.textContent = `Hi, ${String(user.name || 'Guest').trim().split(/\s+/)[0]}`;
+    const logout = document.createElement('button');
+    logout.type = 'button';
+    logout.className = 'nav-logout';
+    logout.textContent = 'Logout';
+    logout.addEventListener('click', logoutUser);
+    slot.append(greeting);
+    if (user.role === 'Administrator') {
+      const admin = document.createElement('a');
+      admin.href = 'index.html#/admin';
+      admin.className = 'nav-admin-link';
+      admin.textContent = 'Admin';
+      slot.append(admin);
+    }
+    slot.append(logout);
+    return;
+  }
+  const login = document.createElement('a');
+  login.href = 'login.html';
+  login.textContent = 'Login';
+  login.dataset.nav = '';
+  const register = document.createElement('a');
+  register.href = 'register.html';
+  register.textContent = 'Register';
+  register.dataset.nav = '';
+  slot.append(login, register);
+}
 
-window.Savore = { SAVORE_KEY, defaultProducts, defaultCategories, readStore, writeStore, getProducts, getCategories, getCart, getOrders, money, cartCount, cartTotal, updateCartCount, addToCart, setPageNav, showToast, orderNumber, statusClass, formatDate };
-document.addEventListener('DOMContentLoaded', () => { getProducts(); getCategories(); setPageNav(); });
+window.Savore = { SAVORE_KEY, defaultProducts, defaultCategories, demoUsers, readStore, writeStore, getProducts, getCategories, getCart, getOrders, getUsers, normalizeEmail, money, cartCount, cartTotal, updateCartCount, addToCart, setPageNav, showToast, orderNumber, statusClass, formatDate, escapeHtml, getCurrentUser, logoutUser, updateAuthNav };
+document.addEventListener('DOMContentLoaded', () => { getProducts(); getCategories(); getUsers(); updateAuthNav(); setPageNav(); });

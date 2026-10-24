@@ -1,1 +1,12 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Products | Savore Admin</title><link rel="stylesheet" href="../assets/css/style.css"></head><body><header class="site-header"><div class="container navbar"><a class="brand" href="../index.html"><span class="brand-mark">S</span>SAVORE CAFÉ</a><a class="btn btn-green" href="dashboard.html">Dashboard</a></div></header><main class="admin-layout"><aside class="side-nav"><h2>Savore Admin</h2><nav><a href="dashboard.html">Dashboard</a><a class="active" href="products.html">Products</a><a href="categories.html">Categories</a><a href="orders.html">Orders</a><a href="users.html">Users</a></nav></aside><section class="admin-main"><div class="toolbar"><div><div class="eyebrow">Catalog</div><h1>Products</h1></div></div><form class="form-card" data-product-form><div class="form-grid"><div class="field"><label>Name</label><input name="name" required></div><div class="field"><label>Category</label><input name="category" required></div><div class="field"><label>Price</label><input name="price" type="number" min="1" required></div><div class="field"><label>Image URL</label><input name="image" type="url"></div><div class="field full"><label>Description</label><input name="description" required></div><label><input name="available" type="checkbox" checked> Available</label></div><button class="btn btn-green" type="submit">Save product</button></form><br><div class="table-wrap"><table><thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Availability</th><th>Action</th></tr></thead><tbody data-products-table></tbody></table></div></section></main><script src="../assets/js/app.js"></script><script src="../assets/js/admin.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products | Savore Admin</title>
+  <script>location.replace('../index.html#/admin/products');</script>
+</head>
+<body>
+  <p>Redirecting to admin products… <a href="../index.html#/admin/products">Continue</a></p>
+</body>
+</html>

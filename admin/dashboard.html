@@ -1,1 +1,12 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Admin Dashboard | Savore Café</title><link rel="stylesheet" href="../assets/css/style.css"></head><body><header class="site-header"><div class="container navbar"><a class="brand" href="../index.html"><span class="brand-mark">S</span>SAVORE CAFÉ</a><span class="eyebrow">Administrator</span></div></header><main class="admin-layout"><aside class="side-nav"><h2>Savore Admin</h2><nav><a class="active" href="dashboard.html">Dashboard</a><a href="products.html">Products</a><a href="categories.html">Categories</a><a href="orders.html">Orders</a><a href="users.html">Users</a></nav></aside><section class="admin-main"><div class="toolbar"><div><div class="eyebrow">Overview</div><h1>Good work, today.</h1></div><a class="btn btn-green" href="products.html">Manage menu</a></div><div class="stat-grid"><div class="stat-card"><strong data-stat="orders">0</strong><span>Total orders</span></div><div class="stat-card"><strong data-stat="pending">0</strong><span>Pending orders</span></div><div class="stat-card"><strong data-stat="completed">0</strong><span>Completed orders</span></div><div class="stat-card"><strong data-stat="products">0</strong><span>Total products</span></div></div><div class="dashboard-card"><div class="eyebrow">System pulse</div><h2>One source of truth.</h2><p>Manage the catalog and keep a close eye on every order. All changes here are stored locally for demonstration.</p></div></section></main><script src="../assets/js/app.js"></script><script>document.addEventListener('DOMContentLoaded',()=>{const orders=Savore.getOrders();document.querySelector('[data-stat="orders"]').textContent=orders.length;document.querySelector('[data-stat="pending"]').textContent=orders.filter(o=>o.status==='Pending').length;document.querySelector('[data-stat="completed"]').textContent=orders.filter(o=>o.status==='Completed').length;document.querySelector('[data-stat="products"]').textContent=Savore.getProducts().length;});</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | Savore Café</title>
+  <script>location.replace('../index.html#/admin');</script>
+</head>
+<body>
+  <p>Redirecting to the admin dashboard… <a href="../index.html#/admin">Continue</a></p>
+</body>
+</html>
